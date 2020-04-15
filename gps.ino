@@ -5,10 +5,6 @@
 #include <SPI.h>
 #include <SD.h>
 
-#define chipSelect 4
-static const int RXPin = 3, TXPin = 2;
-static const uint32_t GPSBaud = 9600;
-
 static void setData();
 void volti();
 void writeInfo();
@@ -22,46 +18,29 @@ char filename1[20];
 char date1[22];
 char filepath[20];
 unsigned long start;
-float latitude, longitude, speed;
-int year, h_dop;
-byte month, day, hour, minute, second;
-byte loopA;
+float latitude, longitude, speed, altitude, h_dop;
+byte month, day, hour, minute, second, year;
 File dataFile;
-#define PIN_SD_CS 4
-#define TFT_CS     10
-#define TFT_RST    9  
-#define TFT_DC     8
-Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
 
-// The serial connection to the GPS device
-SoftwareSerial ss(RXPin, TXPin);
+Adafruit_ST7735 tft = Adafruit_ST7735(10, 8, 9);
+SoftwareSerial ss(3, 2);
 
 void setup()
 {
   Serial.begin(115200);
-  ss.begin(GPSBaud);
+  ss.begin(9600);
   pinMode(6,OUTPUT);
   digitalWrite(6, HIGH);
   tft.initR(INITR_BLACKTAB); //Init
   tft.fillScreen(ST7735_BLACK); //Fill with black
   tft.setTextColor(ST7735_WHITE, ST7735_BLACK); //White text, black background
   tft.setRotation(1);
-  delay(1000);
+  tft.setTextSize(1);  
+  smartDelay(1000);
 
-  tft.setTextSize(1);
-  tft.setCursor(0,0);
-  tft.println("Satellites: ");
-  
   while (true)
   {
-    if (!SD.begin(chipSelect))
-    {
-      Serial.println(F("Card failed"));
-      volti();
-    }
-    else
-    {
-      Serial.println("SD card ready");
+    if (SD.begin(4)){
       break;
     }
   }
@@ -70,10 +49,9 @@ void setup()
   {
     setData();
     unsigned long start = millis();
-    Serial.println(gps.satellites.value());
-    if (gps.satellites.isValid())
+    if (gps.satellites.value())
     {
-      hour = hour + 1;
+      hour = hour + 2;
       if (hour > 23)
       {
         hour = hour - 24;
@@ -81,35 +59,36 @@ void setup()
       }
       sprintf(filename1, "/%02d-%02d-%02d", day, month, year - 2000);
       sprintf(filepath, "/%02d-%02d-%02d/%02d-%02d%s", day, month, year - 2000, hour, minute, ".GPX");
-      Serial.println(filepath);
       SD.mkdir(filename1);
-      tft.setCursor(0,16);
-      tft.println("Start time: ");
-      tft.setCursor(50,16);
+
+      tft.setCursor(0,0);
+      tft.println("St");
+      tft.setCursor(50,0);
       tft.println(hour);
-      tft.setCursor(60,16);
+      tft.setCursor(60,0);
+      tft.println(":");
+      tft.setCursor(65,0);
       tft.println(minute);
-      
+      ////volti();
+
       if (!SD.exists(filepath))
       {
         dataFile = SD.open(filepath, FILE_WRITE);
         dataFile.print(F(
-            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
-            "<gpx version=\"1.1\" creator=\"Batuev\" xmlns=\"http://www.topografix.com/GPX/1/1\" \r\n"
-            "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n"
-            "xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">\r\n"
-            "\t<trk>\r\n<trkseg>\r\n")); //heading of gpx file
-        dataFile.print(F("</trkseg>\r\n</trk>\r\n</gpx>\r\n"));
+                         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
+                         "<gpx version=\"1.1\" creator=\"Batuev\" xmlns=\"http://www.topografix.com/GPX/1/1\" \r\n"
+                         "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\r\n"
+                         "xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd\">\r\n"
+                         "\t<trk>\r\n<trkseg>\r\n")); //heading of gpx file
+        dataFile.print("</trkseg>\r\n</trk>\r\n</gpx>\r\n");
         dataFile.close();
       }
       break;
     }
     else {
       tft.setCursor(0,8);
-      tft.println("SD card valid");
-      tft.setCursor(90,0);
-      tft.println(gps.satellites.value());
-      Serial.println(gps.satellites.value());
+      tft.println("Seek");
+      printInt(gps.satellites.value(), gps.satellites.isValid(), 5);
     }
   }
 }
@@ -117,17 +96,8 @@ void loop()
 {
   // This sketch displays information every time a new sentence is correctly encoded.
   while (ss.available() > 0)
-    if (gps.encode(ss.read())){
+    if (gps.encode(ss.read()))
       writeInfo();
-      tft.println(gps.satellites.value());
-      Serial.println(gps.satellites.value());
-    }
-  if (millis() > 5000 && gps.charsProcessed() < 10)
-  {
-    Serial.println(F("GPS found"));
-    while (true)
-      ;
-  }
 }
 
 static void setData()
@@ -141,16 +111,15 @@ static void setData()
   latitude = gps.location.lat();
   longitude = gps.location.lng();
   speed = gps.speed.kmph();
+  altitude = gps.altitude.meters();
+  h_dop = gps.hdop.hdop() / 100;
 }
 
 void writeInfo()
 {
-  float falt, h_dop1;
+  float falt, h_dop;
   setData();
-  falt = gps.altitude.meters();
-  h_dop1 = gps.hdop.hdop();
-  h_dop1 = h_dop1 / 100;
-  hour = hour + 1; //set your time zone, my zone is +1
+  hour = hour + 1;
   if (hour > 23)
   {
     hour = hour - 24;
@@ -179,17 +148,28 @@ void writeInfo()
     dataFile.print(falt, 1);
     dataFile.print(F("</ele>\r\n<hdop>"));
     //dataFile.print(F("<hdop>"));
-    dataFile.print(h_dop1, 3);
+    dataFile.print(h_dop, 3);
     dataFile.println(F("</hdop>\r\n</trkpt>"));
     dataFile.print(F("</trkseg>\r\n</trk>\r\n</gpx>\r\n"));
     dataFile.close();
-    //Serial.println("Wrote info");
-    //Serial.print(F("Satellites: "));
-    //printInt(gps.satellites.value(), gps.satellites.isValid(), 5);
-    gps.satellites.value();
-    Serial.println();
+    tft.setCursor(0,16);
+    tft.println("Spd");
+    tft.setCursor(40,16);
+    tft.println(speed);
+    tft.setCursor(0,24);
+    tft.println("Alt");
+    tft.setCursor(40,24);
+    tft.println(altitude);
+    tft.setCursor(0,32);
+    tft.println("Cur");
+    tft.setCursor(40,32);
+    tft.println(hour);
+    tft.setCursor(50,32);
+    tft.println(":");
+    tft.setCursor(55,32);
+    tft.println(minute);
   }
-  smartDelay(1000); //writing gps point every 1 sec
+  smartDelay(1000);
 }
 
 static void smartDelay(unsigned long ms)
@@ -202,25 +182,25 @@ static void smartDelay(unsigned long ms)
   } while (millis() - start < ms);
 }
 
-/*static void printInt(unsigned long val, bool valid, int len)
+static void printInt(unsigned long val, bool valid, int len)
 {
   char sz[32] = "*****************";
   if (valid)
     sprintf(sz, "%ld", val);
   sz[len] = 0;
-  for (int i = strlen(sz); i < len; ++i)
+  for (int i=strlen(sz); i<len; ++i)
     sz[i] = ' ';
-  if (len > 0)
-    sz[len - 1] = ' ';
+  if (len > 0) 
+    sz[len-1] = ' ';
   Serial.print(sz);
   smartDelay(0);
-}*/
+}
 
-void volti(){
-  // read the input on analog pin 0:
-  int sensorValue = analogRead(A7);
-  // Convert the analog reading (which goes from 0 - 1023) to a voltage (0 - 5V):
-  float voltage = sensorValue * (3.7 / 765.0);
-  // print out the value you read:
-  Serial.println(voltage);
+void volti() {
+  int val = analogRead(A7);
+  float voltage = val * (3.7 / 1023.0);
+  tft.setCursor(0,8);
+  tft.println("volt:");
+  tft.setCursor(25,8);
+  tft.println(voltage);
 }
