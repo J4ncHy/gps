@@ -9,8 +9,8 @@ SPI and SD libraries and
 https://github.com/mikalhart/TinyGPSPlus.
 
 CONNECTIONS:
-Display:
 
+Display:
 
 | Pin name  | Connection |
 | --------- | ------------- |
