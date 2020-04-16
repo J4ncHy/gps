@@ -23,8 +23,8 @@ CONNECTIONS:
 
 Display:
 
-| Pin name  | Connection |  | Pin name  | Connection |
-| --------- | ------------- | | --------- | ------------- |
+| Pin name  | Connection |
+| --------- | ------------- | 
 | LED-  | GND  |
 |  LED+  | D5 + 220Ω |
 |   SD_CS | D4   |
