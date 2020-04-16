@@ -24,7 +24,7 @@ CONNECTIONS:
 Display:
 
 | Pin name  | Connection |
-| --------- | ------------- | 
+| --------- | ---------- | 
 | LED-  | GND  |
 |  LED+  | D5 + 220Ω |
 |   SD_CS | D4   |
@@ -43,8 +43,8 @@ Display:
 |   GND   | GND   |
 
 GPS:
-  | Pin name  | Connection |
-
+| Pin name  | Connection |
+| --------- | ---------- | 
 | TX| D2 |
 | RX | D3 |
 | GND  | GND |
