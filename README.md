@@ -15,16 +15,16 @@ Display:
 | Pin name  | Connection |
 | --------- | ------------- |
 | LED-  | GND  |
-|  LED+  | D5  |
+|  LED+  | D5 + 220Ω |
 |   SD_CS | D4   |
 |   MOSI  | D11   |
 |   MISO  | D12   |
 |   SCK   | D13   |
-|   CS    | D10   |
-|   SCK   | D13   |
-|   SDA   | D11   |
-|   A0    | D8   |
-|   RESET | D9   |
+|   CS    | D10 + 2k7 Ω|
+|   SCK   | D13 + 2k7 Ω |
+|   SDA   | D11 + 2k7 Ω |
+|   A0    | D8  + 2k7 Ω |
+|   RESET | D9  + 2k7 Ω |
 |   null |   |
 |   null |   |
 |   null |   |
