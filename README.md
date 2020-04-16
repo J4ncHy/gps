@@ -31,6 +31,14 @@ Display:
 |   VCC   | +5 V   |
 |   GND   | GND   |
 
+GPS:
+| Pin name  | Connection |
+| --------- | ------------- |
+| TX| D2 |
+| RX | D3 |
+| GND  | GND |
+| VCC | +5 V |
+
 
 Takes data from a NEO-6M GPS module and writes then onto an SD card in the folder dd-mm-yy and into a hh-mm.gpx file.
 It also displays some info on the 1.8 SPI TFT display.
