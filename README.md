@@ -1,4 +1,4 @@
-# gps
+# GPS
 Gps matura proj
 A project for my matura project.
 
