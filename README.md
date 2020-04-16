@@ -1,6 +1,11 @@
 # GPS
 An arduino project for my matura project.
 
+Takes data from a NEO-6M GPS module and writes then onto an SD card in the folder dd-mm-yy and into a hh-mm.gpx file.
+It also displays some info on the 1.8 SPI TFT display.
+
+To see your recorded path, go to https://www.google.com/maps/d/ and make an new map. Then import the .gpx file into a new layer.
+
 The program is using the following libraries:
 
 - Adafruit GFX library - can use the preloaded TFT libarary instead of this,
@@ -44,9 +49,3 @@ GPS:
 | RX | D3 |
 | GND  | GND |
 | VCC | +5 V |
-
-
-Takes data from a NEO-6M GPS module and writes then onto an SD card in the folder dd-mm-yy and into a hh-mm.gpx file.
-It also displays some info on the 1.8 SPI TFT display.
-
-To see your recorded path, go to https://www.google.com/maps/d/ and make an new map. Then import the .gpx file into a new layer.
