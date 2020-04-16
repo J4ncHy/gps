@@ -2,11 +2,17 @@
 An arduino project for my matura project.
 
 The program is using the following libraries:
+
 Adafruit GFX library - can use the preloaded TFT libarary instead of this,
+
 Adafruit ST7735 and ST7789 Library - can use the preloaded TFT libarary instead of this,
+
 SoftwareSerial preloaded library,
+
 SPI and SD libraries and
+
 https://github.com/mikalhart/TinyGPSPlus.
+
 
 CONNECTIONS:
 
